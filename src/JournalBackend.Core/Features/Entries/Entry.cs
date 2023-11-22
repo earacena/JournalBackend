@@ -4,9 +4,8 @@ namespace JournalBackend.Models;
 
 public class Entry
 {
-    [Required]
-    public string Id { get; set; } = string.Empty;
-    public DateTime Date { get; set; }
+    public string Id { get; set; } = System.Guid.NewGuid().ToString();
+    public DateTime Date { get; set; } = DateTime.Now;
 
     [Required]
     public string UserId { get; set; } = string.Empty;
