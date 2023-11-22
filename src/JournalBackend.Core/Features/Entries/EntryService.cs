@@ -1,60 +1,45 @@
+using System.Data.Common;
 using JournalBackend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace JournalBackend.Services;
 
 public static class EntryService
 {
-    static List<Entry> Entries { get; }
-
-    static EntryService()
+    public static async Task<List<Entry>> GetAll(JournalDbContext db)
     {
-        Entries = new List<Entry>()
-        {
-            new() {
-                Id = Guid.NewGuid().ToString(),
-                UserId = Guid.NewGuid().ToString(),
-                Date = DateTime.Now,
-                Content = "This is content for a journal entry."
-            },
-
-            new() {
-                Id = Guid.NewGuid().ToString(),
-                UserId = Guid.NewGuid().ToString(),
-                Date = DateTime.Now,
-                Content = "This is content for a journal entry."
-            }
-        };
+        return await db.Entries.ToListAsync();
     }
 
-    public static List<Entry> GetAll() => Entries;
-
-    public static Entry? Get(string id)
+    public static async Task<Entry?> Get(JournalDbContext db, string id)
     {
-        return Entries.FirstOrDefault(e => e.Id == id);
+        return await db.Entries.FindAsync(id);
     }
 
-    public static void Add(Entry entry)
+    public static async void Add(JournalDbContext db, Entry entry)
     {
         entry.Id = Guid.NewGuid().ToString();
-        Entries.Add(entry);
+        await db.AddAsync(entry);
+        await db.SaveChangesAsync();
     }
 
-    public static void Delete(string id)
+    public static async void Delete(JournalDbContext db, string id)
     {
-        var entry = Get(id);
+        var entry = await Get(db, id);
         if (entry is null)
             return;
 
-        Entries.Remove(entry);
+        db.Remove(entry);
+        await db.SaveChangesAsync();
     }
 
-    public static void Update(Entry entry)
+    public static async void Update(JournalDbContext db, Entry entry)
     {
-        var index = Entries.FindIndex(e => e.Id == entry.Id);
-        
-        if (index == -1)
+        var item = await Get(db, entry.Id);
+        if (item is null)
             return;
 
-        Entries[index] = entry;
+        item.Content = entry.Content;
+        await db.SaveChangesAsync();
     }
 }

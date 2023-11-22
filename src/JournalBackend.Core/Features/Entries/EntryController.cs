@@ -8,14 +8,6 @@ namespace JournalBackend.Controllers;
 [Route("api/[controller]")]
 public class EntryController : ControllerBase
 {
-    private static readonly List<Entry> Entries = new()
-    {
-        new() {
-            Id = "entry1",
-            UserId = "abcd1",
-            Date = DateTime.Now,
-        }
-    };
 
     private readonly ILogger<EntryController> _logger;
     
@@ -25,15 +17,16 @@ public class EntryController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<Entry>> GetAll()
+    public async Task<ActionResult<List<Entry>>> GetAll(JournalDbContext db)
     {
-        return Ok(EntryService.GetAll());
+        var allEntries = await EntryService.GetAll(db);
+        return Ok(allEntries);
     }
 
     [HttpGet("{id}")]
-    public ActionResult<Entry> Get(string id)
+    public async Task<ActionResult<Entry>> Get(JournalDbContext db, string id)
     {
-        var entry = EntryService.Get(id);
+        var entry = await EntryService.Get(db, id);
 
         if (entry is null)
             return NotFound();
@@ -42,36 +35,36 @@ public class EntryController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Create(Entry entry)
+    public IActionResult Create(JournalDbContext db, Entry entry)
     {
-        EntryService.Add(entry);
-        return CreatedAtAction(nameof(Get), new  { Id = entry.Id }, entry);
+        EntryService.Add(db, entry);
+        return CreatedAtAction(nameof(Get), new { entry.Id }, entry);
     }
 
     [HttpPut("{id}")]
-    public IActionResult Update(string id, Entry entry)
+    public async Task<IActionResult> Update(JournalDbContext db, string id, Entry entry)
     {
         if (id != entry.Id)
             return BadRequest();
         
-        var existingEntry = EntryService.Get(id);
+        var existingEntry = await EntryService.Get(db, id);
         if (existingEntry is null)
             return NotFound();
 
-        EntryService.Update(entry);
+        EntryService.Update(db, entry);
 
         return NoContent();
     }
 
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(string id)
+    public IActionResult Delete(JournalDbContext db, string id)
     {
-        var entry = EntryService.Get(id);
+        var entry = EntryService.Get(db, id);
         if (entry is null) 
             return NotFound();
 
-        EntryService.Delete(id);
+        EntryService.Delete(db, id);
         return NoContent();
     }
 }
