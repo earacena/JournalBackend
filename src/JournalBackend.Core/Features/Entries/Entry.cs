@@ -1,10 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace JournalBackend.Models;
 
 public class Entry
 {
-    public required String Id { get; set; }
+    [Required]
+    public string Id { get; set; } = string.Empty;
     public DateTime Date { get; set; }
-    public required String UserId { get; set; }
-    public String? Content { get; set; }
+
+    [Required]
+    public string UserId { get; set; } = string.Empty;
+    public string? Content { get; set; }
 
 }
