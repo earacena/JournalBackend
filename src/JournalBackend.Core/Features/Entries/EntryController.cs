@@ -41,5 +41,37 @@ public class EntryController : ControllerBase
         return Ok(entry);
     }
 
+    [HttpPost]
+    public IActionResult Create(Entry entry)
+    {
+        EntryService.Add(entry);
+        return CreatedAtAction(nameof(Get), new  { Id = entry.Id }, entry);
+    }
 
+    [HttpPut("{id}")]
+    public IActionResult Update(string id, Entry entry)
+    {
+        if (id != entry.Id)
+            return BadRequest();
+        
+        var existingEntry = EntryService.Get(id);
+        if (existingEntry is null)
+            return NotFound();
+
+        EntryService.Update(entry);
+
+        return NoContent();
+    }
+
+
+    [HttpDelete("{id}")]
+    public IActionResult Delete(string id)
+    {
+        var entry = EntryService.Get(id);
+        if (entry is null) 
+            return NotFound();
+
+        EntryService.Delete(id);
+        return NoContent();
+    }
 }
