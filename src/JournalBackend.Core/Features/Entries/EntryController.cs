@@ -23,6 +23,13 @@ public class EntryController : ControllerBase
         return Ok(allEntries);
     }
 
+    [HttpGet("User/{userId}")]
+    public async Task<ActionResult<List<Entry>>> GetAllOfUser(JournalDbContext db, string userId)
+    {
+        var allUserEntries = await EntryService.GetAllOfUser(db, userId);
+        return Ok(allUserEntries);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<Entry>> Get(JournalDbContext db, string id)
     {

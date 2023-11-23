@@ -11,6 +11,13 @@ public static class EntryService
         return await db.Entries.ToListAsync();
     }
 
+    public static async Task<List<Entry>> GetAllOfUser(JournalDbContext db, string userId)
+    {
+        return await db.Entries
+            .Where(e => e.UserId == userId)
+            .ToListAsync();
+    }
+
     public static async Task<Entry?> Get(JournalDbContext db, string id)
     {
         return await db.Entries.FindAsync(id);
