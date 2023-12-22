@@ -1,4 +1,5 @@
-using System.ComponentModel;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using JournalBackend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -34,6 +35,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+string? JwtKey = Environment.GetEnvironmentVariable("DOTNET_JWT_KEY");
+string? JwtAudience = Environment.GetEnvironmentVariable("VITE_FIREBASE_PROJECT_ID");
+string? JwtIssuer = Environment.GetEnvironmentVariable($"https://securetoken.google.com/{JwtAudience}");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
+    options.Authority = "";
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidAudience = JwtAudience is not null ? JwtAudience : "",
+        ValidIssuer = JwtIssuer is not null ? JwtIssuer : "",
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(JwtKey is not null ? JwtKey : "")),
+        ValidateAudience = true,
+        ValidateIssuer = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+    };
+});
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
