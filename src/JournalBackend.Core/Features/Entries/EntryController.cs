@@ -36,7 +36,7 @@ public class EntryController : ControllerBase
     [HttpGet("User/{userId}")]
     public async Task<ActionResult<List<Entry>>> GetAllOfUser(JournalDbContext db, string userId)
     {
-        string? authUserId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("sub", StringComparison.OrdinalIgnoreCase))?.Value;
+        string? authUserId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase))?.Value;
 
         if (userId != authUserId) {
             return Unauthorized();
@@ -50,7 +50,7 @@ public class EntryController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Entry>> Get(JournalDbContext db, string id)
     {
-        string? userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("sub", StringComparison.OrdinalIgnoreCase))?.Value;
+        string? userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase))?.Value;
         
         var entry = await EntryService.Get(db, id);
 
@@ -70,7 +70,7 @@ public class EntryController : ControllerBase
     public IActionResult Create(JournalDbContext db, Entry entry)
     {
         // Access userId 
-        string? userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("sub", StringComparison.OrdinalIgnoreCase))?.Value;
+        string? userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase))?.Value;
 
         if (userId is null) {
             return Unauthorized();
@@ -85,7 +85,7 @@ public class EntryController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(JournalDbContext db, string id, Entry entry)
     {
-        string? userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("sub", StringComparison.OrdinalIgnoreCase))?.Value;
+        string? userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase))?.Value;
 
         if (id != entry.Id)
             return BadRequest();
@@ -107,7 +107,7 @@ public class EntryController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(JournalDbContext db, string id)
     {
-        string? userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("sub", StringComparison.OrdinalIgnoreCase))?.Value;
+        string? userId = User.Claims.FirstOrDefault(claim => claim.Type.Equals("user_id", StringComparison.OrdinalIgnoreCase))?.Value;
 
         var entry = await EntryService.Get(db, id);
         if (entry is null) 
