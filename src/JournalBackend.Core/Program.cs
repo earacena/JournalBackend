@@ -19,6 +19,25 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Backend API for a journaling web application.",
         Version = "v1",
     });
+
+});
+
+string? JwtKey = Environment.GetEnvironmentVariable("DOTNET_JWT_KEY");
+string? JwtAudience = Environment.GetEnvironmentVariable("VITE_FIREBASE_PROJECT_ID");
+string? JwtIssuer = $"https://securetoken.google.com/{JwtAudience}";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
+    options.Authority = JwtIssuer is not null ? JwtIssuer : "";
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidAudience = JwtAudience is not null ? JwtAudience : "",
+        ValidIssuer = JwtIssuer is not null ? JwtIssuer : "",
+        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(JwtKey is not null ? JwtKey : "")),
+        ValidateAudience = true,
+        ValidateIssuer = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+    };
 });
 
 var app = builder.Build();
@@ -34,28 +53,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-string? JwtKey = Environment.GetEnvironmentVariable("DOTNET_JWT_KEY");
-string? JwtAudience = Environment.GetEnvironmentVariable("VITE_FIREBASE_PROJECT_ID");
-string? JwtIssuer = Environment.GetEnvironmentVariable($"https://securetoken.google.com/{JwtAudience}");
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
-    options.Authority = "";
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidAudience = JwtAudience is not null ? JwtAudience : "",
-        ValidIssuer = JwtIssuer is not null ? JwtIssuer : "",
-        IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(JwtKey is not null ? JwtKey : "")),
-        ValidateAudience = true,
-        ValidateIssuer = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-    };
-});
-
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
